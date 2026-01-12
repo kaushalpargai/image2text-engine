@@ -12,20 +12,31 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
+# Install python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Create a non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser
 
 # Copy application code
 COPY . .
 
-# Create directory structure for data (if not mapped via volume, though they should be)
-RUN mkdir -p uploads results
+# Set permissions for the app user
+# We need to ensure uploads/results exist and are writable
+RUN mkdir -p uploads results && \
+    chown -R appuser:appuser /app && \
+    chmod +x start.sh && \
+    sed -i 's/\r$//' start.sh
 
-# Expose port
+# Switch to non-root user
+USER appuser
+
+# Expose port (Documentation only, actual port set by env)
 EXPOSE 8000
 
 # Set production environment by default
 ENV APP_ENV=production
 
-# Run the application
-CMD ["python", "main.py"]
+# Run the application using the start script
+CMD ["./start.sh"]

@@ -8,3 +8,4 @@ python-multipart
 pillow
 python-dotenv
 opencv-python-headless
+gunicorn>=21.2.0
