@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # Your existing Image2Text OCR Engine
+  image2text_engine:
+    build: .
+    image: image2text-engine:latest
+    container_name: image2text_engine
+    ports:
+      - "${IMAGE2TEXT_PORT:-8005}:${IMAGE2TEXT_PORT:-8005}"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      - ./.env.production:/app/.env.production
+    environment:
+      - APP_ENV=production
+    restart: unless-stopped
+    networks:
+      - ocr-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8005/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Example: Python client service that uses the OCR engine
+  ocr_client:
+    image: python:3.9-slim
+    container_name: ocr_client
+    working_dir: /app
+    volumes:
+      - ./client_example:/app
+    environment:
+      - OCR_SERVICE_URL=http://image2text_engine:8005
+    command: tail -f /dev/null # Keep container running for testing
+    depends_on:
+      - image2text_engine
+    networks:
+      - ocr-network
+  # Example: Node.js service that integrates with OCR
+  # Uncomment if you want to add a Node.js service
+  # nodejs_app:
+  #   image: node:18-alpine
+  #   container_name: nodejs_ocr_app
+  #   working_dir: /app
+  #   volumes:
+  #     - ./nodejs_client:/app
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - OCR_SERVICE_URL=http://image2text_engine:8005
+  #   depends_on:
+  #     - image2text_engine
+  #   networks:
+  #     - ocr-network
+  #   command: npm start
+
+networks:
+  ocr-network:
+    driver: bridge
+    name: ocr-network

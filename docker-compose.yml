@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  image2text_engine:
+    build: .
+    image: image2text-engine:latest
+    container_name: image2text_engine
+    ports:
+      - "${IMAGE2TEXT_PORT:-8000}:${IMAGE2TEXT_PORT:-8000}"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      # Mount config/code for development (optional, good for local)
+      - ./.env.production:/app/.env.production
+    environment:
+      - APP_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
