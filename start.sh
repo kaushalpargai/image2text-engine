@@ -1,14 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
-# If GUNICORN_WORKERS is not set, default to 1 (safe default)
-# In production, you might set this higher (e.g., 2-4) via env var
 WORKERS=${GUNICORN_WORKERS:-1}
 PORT=${IMAGE2TEXT_PORT:-8000}
 
 if [ "$APP_ENV" = "production" ]; then
     echo "Starting in PRODUCTION mode with Gunicorn ($WORKERS workers)..."
-    # Timeout set to 120s for long OCR jobs
     exec gunicorn main:app \
         --workers $WORKERS \
         --worker-class uvicorn.workers.UvicornWorker \
@@ -17,7 +14,6 @@ if [ "$APP_ENV" = "production" ]; then
         --access-logfile - \
         --error-logfile -
 else
-    echo "Starting in DEVELOPMENT mode with source reload..."
-    # Config is read from main.py which uses IMAGE2TEXT_PORT env var
+    echo "Starting in DEVELOPMENT mode..."
     exec python main.py
 fi
