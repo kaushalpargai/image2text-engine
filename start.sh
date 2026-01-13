@@ -10,7 +10,8 @@ if [ "$APP_ENV" = "production" ]; then
         --workers $WORKERS \
         --worker-class uvicorn.workers.UvicornWorker \
         --bind 0.0.0.0:$PORT \
-        --timeout 120 \
+        --timeout 600 \
+        --graceful-timeout 600 \
         --access-logfile - \
         --error-logfile -
 else
