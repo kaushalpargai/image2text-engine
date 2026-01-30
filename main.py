@@ -202,6 +202,7 @@ async def process_images(file_info: dict):
 
             # Create result object
             result_obj = {
+                "success": True,
                 "filename": filename,
                 "original_name": file_data.get("original_name"),
                 "image_url": f"/uploads/{filename}",
@@ -225,6 +226,7 @@ async def process_images(file_info: dict):
             print(f"Error processing {filename}: {str(e)}")
             traceback.print_exc()
             processed_results.append({
+                "success": False,
                 "filename": filename,
                 "original_name": file_data.get("original_name"),
                 "image_url": f"/uploads/{filename}",
