@@ -15,6 +15,12 @@ services:
     environment:
       - APP_ENV=production
       - IMAGE2TEXT_PORT=${IMAGE2TEXT_PORT:-8000}
+    deploy:
+      resources:
+        limits:
+          memory: 4096M
+        reservations:
+          memory: 512M
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:${IMAGE2TEXT_PORT:-8000}/health" ]
